@@ -16,7 +16,7 @@ combinations = combinations.dropna().astype(int).drop_duplicates().loc[2:,:]
 for comb in combinations.itertuples():
     # set params
     attentions_types = (comb.head_rel, comb.rel_tail, comb.head_tail, comb.rel_head, comb.tail_rel, comb.tail_head)
-    use_bert, use_lmms = comb.use_bert, comb.use_lmms
+    use_bert, use_lmms = comb.use_bert, comb._8
     
     # compute vectors
     get_train_test_data(attentions_types, use_bert, use_lmms)
