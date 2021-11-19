@@ -28,7 +28,7 @@ string.punctuation += '–'
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
-# ft_model = ft.load_model('../../../language-models-are-knowledge-graphs-pytorch/similarity/LMMS/cc.en.300.bin')
+ft_model = ft.load_model('../../../language-models-are-knowledge-graphs-pytorch/similarity/LMMS/cc.en.300.bin')
 #ft_model = ft.load_model('path/to/model/cc.en.300.bin')
 nlp = en_core_web_sm.load()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
