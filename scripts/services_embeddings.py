@@ -11,7 +11,7 @@ from IPython.display import display
 
 import nltk
 import spacy
-import fasttext as ft
+# import fasttext as ft
 import en_core_web_sm
 
 import torch
@@ -28,7 +28,7 @@ string.punctuation += '–'
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
-ft_model = ft.load_model('../../../language-models-are-knowledge-graphs-pytorch/similarity/LMMS/cc.en.300.bin')
+# ft_model = ft.load_model('../../../language-models-are-knowledge-graphs-pytorch/similarity/LMMS/cc.en.300.bin')
 #ft_model = ft.load_model('path/to/model/cc.en.300.bin')
 nlp = en_core_web_sm.load()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -80,29 +80,46 @@ def vectorize_pred_rel(rel_pred, vectorized_dict):
 
 
 def get_embs_for_triplets(triplets, sentence_mapping, attention, attentions_types, with_label=False, use_bert=False, use_lmms=False):
+    new_triplets = []
+    
     for triplet in triplets:
         #  tokenize target the same way as sentence to avoid index error
         if ',' in triplet[0] or "'" in triplet[0]:
-            triplet[0] = ' '.join(word_tokenize(triplet[0]))
-
+            head = ' '.join(word_tokenize(triplet[0]))
+        else:
+            head = triplet[0]
             
         if ',' in triplet[1] or "'" in triplet[1]:
-            triplet[1] = ' '.join(word_tokenize(triplet[1]))
+            tail = ' '.join(word_tokenize(triplet[1]))
+        else:
+            tail = triplet[1]
         
         if ',' in triplet[2] or "'" in triplet[2]:
-            triplet[2] = ' '.join(word_tokenize(triplet[2]))
+            rel = ' '.join(word_tokenize(triplet[2]))
+        else:
+            rel = triplet[2]
+        
+        if with_label:
+            rel_label = triplet[3]
+            new_triplets.append((head, tail, rel, rel_label))
+        else:
+            new_triplets.append((head, tail, rel))
 
     
     sent_embeddings = []
     sentence = ' '.join(sentence_mapping)
     rel_toks = set([triplet[2] for triplet in triplets])
     
-    vectorized_dict = {rel: get_bert_vector(rel, sentence) for rel in rel_toks}
+    if use_bert:
+        vectorized_dict = {rel: get_bert_vector(rel, sentence) for rel in rel_toks}
     
     
-    for triplet in triplets:
+    for triplet in new_triplets:
         #  tokenize target the same way as sentence to avoid index error
-        head, tail, ral = triplet
+        if with_label:
+            head, tail, rel, rel_label = triplet
+        else:
+            head, tail, rel = triplet
 
         try:
             if head in sentence_mapping and tail in sentence_mapping and rel in sentence_mapping:
@@ -119,7 +136,7 @@ def get_embs_for_triplets(triplets, sentence_mapping, attention, attentions_type
                 tail_rel_emb = attention[:, tail_ind, rel_ind]
                 tail_head_emb = attention[:, tail_ind, head_ind]
                 
-                #  choose only neede vectors
+                #  choose only needed vectors
                 attentions_to_be_used = [head_rel_emb, rel_tail_emb, head_tail_emb, rel_head_emb, tail_rel_emb, tail_head_emb] 
                 attentions_to_use = tuple([att for i, att in enumerate(attentions_to_be_used) if attentions_types[i] == 1])
 
@@ -135,7 +152,6 @@ def get_embs_for_triplets(triplets, sentence_mapping, attention, attentions_type
                     
                 #  add label if 'train' 
                 if with_label:
-                    rel_label = triplet[3]
                     sent_embeddings.append((triplet_emb, triplet, rel_label))
                 else:
                     sent_embeddings.append((triplet_emb, triplet))
@@ -250,7 +266,7 @@ def get_filename(data_type, attentions_types, use_bert, use_lmms):
 
 
 def get_embeddings_corpus(data_type, attentions_types, use_bert, use_lmms):  
-    use_cuda = True
+    use_cuda = False
     data = pd.read_csv(f'../data/train-val-test/{data_type}.csv', header=0)
     all_embeddings = []
     
