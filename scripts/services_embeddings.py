@@ -110,7 +110,7 @@ def get_embs_for_triplets(triplets, sentence_mapping, attention, attentions_type
     sentence = ' '.join(sentence_mapping)
     rel_toks = set([triplet[2] for triplet in triplets])
     
-    if use_bert:
+    if use_bert or use_lmms:
         vectorized_dict = {rel: get_bert_vector(rel, sentence) for rel in rel_toks}
     
     
