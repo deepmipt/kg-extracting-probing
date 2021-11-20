@@ -187,9 +187,11 @@ def return_embeddings(sentence, attentions_types, tokenizer, encoder, nlp, use_c
         if use_cuda:
             for key in inputs.keys():
                 inputs[key] = inputs[key].cuda()
-        
-        outputs = encoder(**inputs, output_attentions=True)
-
+        try:
+            outputs = encoder(**inputs, output_attentions=True)
+        except RuntimeError:
+            print(sentence_mapping)
+            return []
 
     attn = outputs[2]   
 
