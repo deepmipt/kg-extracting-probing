@@ -245,7 +245,7 @@ def return_embeddings(sentence, attentions_types, tokenizer, encoder, nlp, use_c
                       if triplet[0] != triplet[1] and triplet[0] != triplet[2] and triplet[1] != triplet[2]]
         
         #  get embeddings for candidate triplets (to be classified further)
-        sent_embeddings.extend(get_embs_for_triplets(triplets, sentence_mapping, new_matr, attentions_types, with_label=False))
+        sent_embeddings.extend(get_embs_for_triplets(triplets, sentence_mapping, new_matr, attentions_types, use_bert, use_lmms, with_label=False))
     
     return sent_embeddings
 
