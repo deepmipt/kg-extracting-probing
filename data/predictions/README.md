@@ -1,17 +1,25 @@
 # About data
 
+[DOWNLOAD LINK](https://drive.google.com/file/d/1sVK-L0WUBKtm9PAV1BjVJ0jm_5ov_J-3/view?usp=sharing)
 
+**Structure**:
+
+```val_results/best_models/``` - здесь модели с самыми высоким обшим f1 для которых тестили разные трешхолды на этапе бинарной классификации ```res_{bin_logreg_threshold}_{attention_types}.csv```
+
+```val_results/best_models_with_multi/``` -  здесь модели с самыми высоким обшим f1 для которых тестили разные трешхолды на этапе мультиклассовой классификации ```res_{bin_logreg_threshold}_{multi_logreg_threshold}_{attention_types}.csv```
+
+```val_results/``` - здесь все что вне папок, это общие эксперименты, без трешхолда на ```multi_logreg``` где ```res_{bin_logreg_threshold}_{attention_types + bert/lmms}.csv```
 
 ```bash
 val_results
-├── best_models
+├── best_models 
 │   ├── res_0.7_h-r_r-t_h-t_r-h_t-r.csv
 │   ├── res_0.7_h-r_r-t_h-t_r-h_t-r_t-h.csv
 │   ├── res_0.8_h-r_r-t_h-t_r-h_t-r.csv
 │   ├── res_0.8_h-r_r-t_h-t_r-h_t-r_t-h.csv
 │   ├── res_0.9_h-r_r-t_h-t_r-h_t-r.csv
 │   └── res_0.9_h-r_r-t_h-t_r-h_t-r_t-h.csv
-├── best_models_with_multi
+├── best_models_with_multi 
 │   ├── res_0.7_0.2_h-r_r-t_h-t_r-h_t-r.csv
 │   ├── res_0.7_0.2_h-r_r-t_h-t_r-h_t-r_t-h.csv
 │   ├── res_0.8_0.2_h-r_r-t_h-t_r-h_t-r.csv
