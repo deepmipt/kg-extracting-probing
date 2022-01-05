@@ -121,7 +121,7 @@ def create_mapping_target(sentence, target, return_pt=False, tokenizer=None):
     return outputs, tokenid2word_mapping, token2id, sentence_mapping
 
 
-def compress_attention(attention, tokenid2word_mapping, operator=np.mean):
+def compress_attention(attention, tokenid2word_mapping, operator=np.sum):
 
     new_index = []
     
