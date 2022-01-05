@@ -40,7 +40,7 @@ def get_vectors_name(attentions_types, use_bert, use_lmms):
     return name
 
 def get_Xy_data(data_type, vectors_name):
-    with open(f'./vectors/{data_type}_{vectors_name}.pkl', 'rb') as file:
+    with open(f'./vectors_recomputed_sum/{data_type}_{vectors_name}.pkl', 'rb') as file:
         embeddings = pickle.load(file)
     
     embeddings_df = pd.DataFrame(embeddings, columns=['embedding', 'triplet', 'rel_label'])
@@ -55,10 +55,18 @@ def get_Xy_data(data_type, vectors_name):
 def train_lr_bin(X_train, labels_train, X_test, labels_test, vectors_name):
     y_train = np.array(['0' if label == '0' else '1' for label in labels_train]).reshape(-1, 1)
     y_test = np.array(['0' if label == '0' else '1' for label in labels_test]).reshape(-1, 1)
+    n_attentions = len(vectors_name.split('_')) - 2
+    iters = 100
+        
+    if n_attentions > 2:
+        iters += 25
 
-    lr_bin = LogisticRegression(max_iter=1000).fit(X_train, y_train)
+    if n_attentions == 6:
+        iters += 25
 
-    with open(f'./logreg_models/lr_bin_{vectors_name}.pkl', 'wb') as file:
+    lr_bin = LogisticRegression(max_iter=iters, solver='saga', n_jobs=32, verbose=2).fit(X_train, y_train)
+
+    with open(f'./logreg_models_recomputed_sum/lr_bin_{vectors_name}.pkl', 'wb') as file:
           pickle.dump(lr_bin, file)
             
     y_pred = lr_bin.predict(X_test)
@@ -67,7 +75,7 @@ def train_lr_bin(X_train, labels_train, X_test, labels_test, vectors_name):
     print(report)
     
     report_df = pd.DataFrame(report).transpose()
-    report_df.to_csv(f'./logreg_models/report_bin_{vectors_name}.csv')
+    report_df.to_csv(f'./logreg_models_recomputed_sum/report_bin_{vectors_name}.csv')
     
 
 def train_lr_multi(X_train, y_train, X_test, y_test, vectors_name):    
@@ -81,14 +89,22 @@ def train_lr_multi(X_train, y_train, X_test, y_test, vectors_name):
     X_test_resampled, y_test_resampled = ros.fit_resample(X_test, y_test)
     X_test = np.array(X_test_resampled)
     y_test = np.array(y_test_resampled)
+    n_attentions = len(vectors_name.split('_')) - 2
+    iters = 100
+        
+    if n_attentions > 2:
+        iters += 5
 
-    lr_multi = LogisticRegression(class_weight='balanced', max_iter=1000).fit(X_train, y_train)
+    if n_attentions == 6:
+        iters += 5
+        
+    lr_multi = LogisticRegression(class_weight='balanced', solver='saga', max_iter=iters, n_jobs=32, verbose=2).fit(X_train, y_train)
 
-    with open(f'./logreg_models/lr_multi_{vectors_name}.pkl', 'wb') as file:
+    with open(f'./logreg_models_recomputed_sum/lr_multi_{vectors_name}.pkl', 'wb') as file:
           pickle.dump(lr_multi, file)
 
     y_pred = lr_multi.predict(X_test)
 
     report = classification_report(y_test, y_pred, output_dict=True)
     report_df = pd.DataFrame(report).transpose()
-    report_df.to_csv(f'./logreg_models/report_multi_{vectors_name}.csv')
+    report_df.to_csv(f'./logreg_models_recomputed_sum/report_multi_{vectors_name}.csv')
