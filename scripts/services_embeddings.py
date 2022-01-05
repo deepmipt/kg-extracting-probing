@@ -28,15 +28,11 @@ string.punctuation += '–'
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
-ft_model = ft.load_model('../../../language-models-are-knowledge-graphs-pytorch/similarity/LMMS/cc.en.300.bin')
+#ft_model = ft.load_model('../../../language-models-are-knowledge-graphs-pytorch/similarity/LMMS/cc.en.300.bin')
 #ft_model = ft.load_model('path/to/model/cc.en.300.bin')
 nlp = en_core_web_sm.load()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-bert_model = BertModel.from_pretrained("bert-base-uncased")
-bert_model = bert_model.eval()
-bert_model = bert_model.to(device)
 
 encoder = BertModel.from_pretrained("bert-base-cased")
 encoder = encoder.eval()
@@ -79,7 +75,7 @@ def vectorize_pred_rel(rel_pred, vectorized_dict):
     return pred_vector
 
 
-def get_embs_for_triplets(triplets, sentence_mapping, attention, attentions_types, with_label=False, use_bert=False, use_lmms=False):
+def get_embs_for_triplets(triplets, sentence_mapping, attention, attentions_types, use_bert=False, use_lmms=False, with_label=False,):
     new_triplets = []
     
     for triplet in triplets:
@@ -190,9 +186,9 @@ def return_embeddings(sentence, attentions_types, tokenizer, encoder, nlp, use_c
         try:
             outputs = encoder(**inputs, output_attentions=True)
         except RuntimeError:
-            print(sentence_mapping)
+            print('very long sequence')
             return []
-
+            
     attn = outputs[2]   
 
     new_matr = []
@@ -266,7 +262,7 @@ def get_filename(data_type, attentions_types, use_bert, use_lmms):
 
 
 def get_embeddings_corpus(data_type, attentions_types, use_bert, use_lmms):  
-    use_cuda = False
+    use_cuda = True
     data = pd.read_csv(f'../data/train-val-test/{data_type}.csv', header=0)
     all_embeddings = []
     
@@ -288,18 +284,23 @@ def get_embeddings_corpus(data_type, attentions_types, use_bert, use_lmms):
                                        use_lmms=use_lmms, 
                                        target=target, 
                                        mode=mode)
+        # append for valid, extend for train test
+        if mode in ['train', 'test']:
+            all_embeddings.extend(embeddings_text)
+        else:
+            all_embeddings.append(embeddings_text)
         
-        all_embeddings.extend(embeddings_text)
-        
-        file_name = get_filename(data_type, attentions_types, use_bert, use_lmms)
+    file_name = get_filename(data_type, attentions_types, use_bert, use_lmms)
         
 #         df = pd.DataFrame(embeddings_text)
 #         df.to_csv(f'./vectors/{csv_name}.csv', mode='a', header=False, index=False)
     
-    with open(f'./vectors/{file_name}.pkl', 'wb') as file:
+    with open(f'./vectors_recomputed_sum/{file_name}.pkl', 'wb') as file:
         pickle.dump(all_embeddings, file)
         
         
 def get_train_test_data(attentions_types, use_bert, use_lmms):
     get_embeddings_corpus('train', attentions_types, use_bert, use_lmms)
     get_embeddings_corpus('test', attentions_types, use_bert, use_lmms)
+    get_embeddings_corpus('valid', attentions_types, use_bert, use_lmms)
+
