@@ -2,14 +2,13 @@ import os
 import pandas as pd
 from tqdm import tqdm 
 
-# from services_embeddings import get_train_test_data
 from generate_embeddings import generate_new_embeddings
 from services_logreg import (get_vectors_name, get_Xy_data, train_lr_bin, train_lr_multi)
 from services_metrics_with_multi import (get_vectorname, load_lr_models, compute_csv_default)
 import pickle
 
-os.makedirs('./logreg_models_recomputed/', exist_ok=True)
-os.makedirs('./val_results_recomputed/', exist_ok=True)
+os.makedirs('./logreg_models_recomputed_sum/', exist_ok=True)
+os.makedirs('./val_results_recomputed_sum/', exist_ok=True)
 
 combinations = pd.read_excel('../data/meta/extract_kg_from_lms.xlsx')
 combinations = combinations.dropna().astype(int).drop_duplicates().loc[2:,:].reset_index(drop=True)
@@ -25,9 +24,6 @@ for comb in tqdm(combinations.itertuples(), total=len(combinations)):
     attentions_types = list(comb)[1:]
     print('!!! combinations', attentions_types)
 
-    # compute vectors
-    # get_train_test_data(attentions_types, False, False)
-    
     # generate new embeddings
     generate_new_embeddings('train', attentions_types, False, False)    
     generate_new_embeddings('test', attentions_types, False, False)    
