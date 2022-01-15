@@ -1,2 +1,6 @@
 pandas==1.3.4
 transformers
+spacy
+imblearn
+torch
+nltk
